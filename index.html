@@ -3,36 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CHEN HAO | AI & Agents</title>
-  <!-- 引入极客风格字体 -->
+  <title>CHEN HAO | AI & FinTech</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --primary: #00f2ff; /* 赛博蓝 */
-      --secondary: #bd00ff; /* 霓虹紫 */
-      --bg-color: #050505;
-      --text-color: #e0e0e0;
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #1a1a1a;
+      --text-muted: #555;
+      --primary: #ff6b6b;
+      --card-bg: rgba(255, 255, 255, 0.65); /* 更通透的卡片 */
+      --card-border: rgba(255, 255, 255, 0.8);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'JetBrains Mono', monospace;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text-main);
       height: 100vh;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
+      background-color: #f8f9fa; /* 纯净的底色 */
       position: relative;
     }
 
-    /* 背景 Canvas */
+    /* 1. 动态 Canvas 背景 */
     #canvas-bg {
       position: absolute;
       top: 0;
@@ -40,277 +39,284 @@
       width: 100%;
       height: 100%;
       z-index: 0;
+      /* 这里加一个模糊滤镜，让光球融合得更奶油般顺滑 */
+      filter: blur(80px); 
+      transform: scale(1.2); /* 放大一点避免边缘模糊问题 */
     }
 
-    /* 主卡片容器 */
+    /* 2. 噪点纹理层 (Noise Overlay) - 提升质感的关键 */
+    .noise-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.06; /* 淡淡的磨砂感 */
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* 3. 卡片容器 */
     .card {
       position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 600px;
-      padding: 40px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
-      animation: fadeIn 1.5s ease-out;
-      margin: 20px;
+      z-index: 2;
+      width: 90%;
+      max-width: 680px;
+      padding: 50px;
+      background: var(--card-bg);
+      /* 玻璃拟态 + 饱和度提升 */
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--card-border);
+      border-radius: 30px;
+      box-shadow: 
+        0 40px 60px -20px rgba(0, 0, 0, 0.05),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      text-align: left;
+      animation: floatUp 1s ease-out;
     }
 
-    /* 名字 - 故障风效果 */
     h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 3rem;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: #fff;
-      text-transform: uppercase;
-      position: relative;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary);
-      animation: glitch 3s infinite alternate;
-    }
-
-    /* 标签行 */
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 25px;
-    }
-
-    .tag {
-      font-size: 0.8rem;
-      padding: 5px 12px;
-      border-radius: 50px;
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      background: rgba(0, 242, 255, 0.05);
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-    }
-
-    .tag:hover {
-      background: var(--primary);
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      letter-spacing: -0.03em;
       color: #000;
-      box-shadow: 0 0 15px var(--primary);
+      /* 简单的黑色更有力，因为背景已经很花哨了 */
     }
 
-    /* 简介区域 */
-    .bio {
+    .subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #666;
       margin-bottom: 30px;
-      min-height: 60px; /* 防止高度跳动 */
-      line-height: 1.6;
-      font-size: 1rem;
-      color: #aaa;
-    }
-    
-    .cursor {
-      display: inline-block;
-      width: 8px;
-      height: 18px;
-      background-color: var(--primary);
-      animation: blink 1s infinite;
-      vertical-align: middle;
-      margin-left: 5px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
     }
 
-    /* 链接按钮 */
+    .pill {
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.06);
+      font-weight: 600;
+      color: #333;
+    }
+
+    .bio {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 40px;
+      font-weight: 300;
+      max-width: 95%;
+    }
+
+    /* 链接区 */
     .links {
       display: flex;
-      gap: 20px;
-      margin-top: 20px;
+      gap: 15px;
     }
 
     .btn {
       text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dark {
+      background: #111;
       color: #fff;
-      font-weight: bold;
-      padding: 12px 24px;
-      border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      background: linear-gradient(45deg, transparent 5%, var(--glass-bg) 5%);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15);
     }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: 0.5s;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn:hover {
-      border-color: var(--secondary);
-      box-shadow: 0 0 20px rgba(189, 0, 255, 0.4);
+    .btn-dark:hover {
       transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(0,0,0,0.25);
+      background: #000;
     }
 
-    /* 动画关键帧 */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .btn-light {
+      background: rgba(255,255,255,0.5);
+      color: #111;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .btn-light:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    /* 简单的打字机光标 */
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: #ff6b6b;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
     }
 
-    @keyframes glitch {
-      0% { text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary); }
-      25% { text-shadow: -2px 2px var(--secondary), 2px -2px var(--primary); }
-      50% { text-shadow: 2px -2px var(--secondary), -2px 2px var(--primary); }
-      75% { text-shadow: -2px -2px var(--secondary), 2px 2px var(--primary); }
-      100% { text-shadow: 2px 2px var(--secondary), -2px -2px var(--primary); }
-    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* 移动端适配 */
     @media (max-width: 600px) {
-      h1 { font-size: 2.2rem; }
-      .card { padding: 25px; margin: 15px; }
-      .links { flex-direction: column; gap: 10px; text-align: center; }
+      .card { padding: 30px; width: 92%; }
+      h1 { font-size: 2.5rem; }
+      .links { flex-direction: column; }
+      .btn { justify-content: center; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 动态背景 -->
+  <!-- 背景：流体光球 -->
   <canvas id="canvas-bg"></canvas>
+  <!-- 纹理：噪点 -->
+  <div class="noise-overlay"></div>
 
-  <main class="card">
+  <div class="card">
     <h1>CHEN HAO</h1>
     
-    <div class="tags">
-      <span class="tag">MSc @ NTU</span>
-      <span class="tag">AI Research</span>
-      <span class="tag">FinTech</span>
-      <span class="tag">Autonomous Agents</span>
+    <div class="subtitle">
+      <span class="pill">📍 MSc @ NTU</span>
+      <span class="pill">🤖 AI & Agents</span>
+      <span class="pill">📈 FinTech</span>
     </div>
 
     <div class="bio">
-      <span id="typewriter"></span><span class="cursor"></span>
+      Hi, I'm Chen Hao. <br>
+      <span id="typewriter" style="color: #444;"></span><span class="cursor"></span>
     </div>
 
     <div class="links">
-      <a href="https://github.com/CHEHHAO" target="_blank" class="btn">GITHUB</a>
-      <a href="#" class="btn">RESUME</a>
-      <a href="mailto:your-email@example.com" class="btn">CONTACT</a>
+      <a href="https://github.com/CHEHHAO" class="btn btn-dark">
+        GitHub <span>↗</span>
+      </a>
+      <a href="#" class="btn btn-light">Resume</a>
+      <a href="mailto:your-email@example.com" class="btn btn-light">Contact</a>
     </div>
-  </main>
+  </div>
 
   <script>
-    // --- 打字机效果 ---
-    const textToType = "System initialized. I build intelligent agents and explore the frontier of FinTech.";
-    const typeWriterElement = document.getElementById('typewriter');
-    let i = 0;
-
-    function typeWriter() {
-      if (i < textToType.length) {
-        typeWriterElement.innerHTML += textToType.charAt(i);
-        i++;
-        setTimeout(typeWriter, 50); // 打字速度
+    // --- 打字机逻辑 ---
+    const text = "Building intelligent financial systems and next-gen autonomous agents.";
+    const twElem = document.getElementById('typewriter');
+    let charIndex = 0;
+    function type() {
+      if (charIndex < text.length) {
+        twElem.textContent += text.charAt(charIndex);
+        charIndex++;
+        setTimeout(type, 40);
       }
     }
+    setTimeout(type, 500);
 
-    // 延迟一点开始打字，更有仪式感
-    setTimeout(typeWriter, 1000);
-
-
-    // --- 粒子网络背景 (Neural Network Effect) ---
+    // --- 流体光球动画 (Fluid Orbs) ---
     const canvas = document.getElementById('canvas-bg');
     const ctx = canvas.getContext('2d');
-    let particlesArray;
+    
+    let width, height;
+    let orbs = [];
 
-    // 设置画布大小
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // 配色方案：明亮、暖色、科技感 (橙色, 珊瑚红, 晨曦金, 浅蓝)
+    const colors = [
+      '#FF9A9E', // 暖粉
+      '#FECFEF', // 浅粉
+      '#FFD1FF', // 亮紫
+      '#a18cd1', // 柔紫
+      '#fbc2eb', // 玫瑰
+      '#8fd3f4'  // 科技蓝 (作为点缀)
+    ];
 
-    class Particle {
+    class Orb {
       constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.directionX = (Math.random() * 0.4) - 0.2;
-        this.directionY = (Math.random() * 0.4) - 0.2;
-        this.size = Math.random() * 2 + 1;
-        this.color = '#00f2ff';
+        this.init();
       }
-      // 绘制
+
+      init() {
+        // 半径很大，占据屏幕大块区域
+        this.radius = Math.random() * 150 + 200; 
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        // 移动速度非常慢，像云一样漂浮
+        this.vx = (Math.random() - 0.5) * 1.5;
+        this.vy = (Math.random() - 0.5) * 1.5;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        // 随机透明度
+        this.alpha = Math.random() * 0.3 + 0.4;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // 碰到边界反弹
+        if (this.x < -100 || this.x > width + 100) this.vx *= -1;
+        if (this.y < -100 || this.y > height + 100) this.vy *= -1;
+      }
+
       draw() {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color;
+        // 径向渐变，模拟光球
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'rgba(255,255,255,0)'); // 边缘完全透明
+
+        ctx.fillStyle = gradient;
+        // 使用 globalAlpha 控制整体透明度
+        ctx.globalAlpha = this.alpha; 
+        // 使用 screen 混合模式让颜色叠加更亮丽
+        ctx.globalCompositeOperation = 'screen'; 
+        
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
-      }
-      // 更新位置
-      update() {
-        if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-        if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
-        this.x += this.directionX;
-        this.y += this.directionY;
-        this.draw();
+        
+        // 重置混合模式
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
       }
     }
 
-    // 初始化粒子
-    function init() {
-      particlesArray = [];
-      let numberOfParticles = (canvas.height * canvas.width) / 9000; // 粒子密度
-      for (let i = 0; i < numberOfParticles; i++) {
-        particlesArray.push(new Particle());
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      initOrbs();
+    }
+
+    function initOrbs() {
+      orbs = [];
+      // 创建 6 个大光球
+      for(let i=0; i<6; i++) {
+        orbs.push(new Orb());
       }
     }
 
-    // 连线逻辑 (模拟神经网络)
-    function connect() {
-      let opacityValue = 1;
-      for (let a = 0; a < particlesArray.length; a++) {
-        for (let b = a; b < particlesArray.length; b++) {
-          let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
-                         ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-          if (distance < (canvas.width/7) * (canvas.height/7)) {
-            opacityValue = 1 - (distance/20000);
-            ctx.strokeStyle = 'rgba(0, 242, 255,' + opacityValue + ')';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-            ctx.stroke();
-          }
-        }
-      }
-    }
-
-    // 动画循环
     function animate() {
-      requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let i = 0; i < particlesArray.length; i++) {
-        particlesArray[i].update();
+      // 清空画布
+      ctx.clearRect(0, 0, width, height);
+      // 白色背景底色
+      ctx.fillStyle = "#ffffff"; 
+      ctx.fillRect(0,0,width,height);
+
+      for (let orb of orbs) {
+        orb.update();
+        orb.draw();
       }
-      connect();
+      requestAnimationFrame(animate);
     }
 
-    // 窗口大小改变时重置
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      init();
-    });
-
-    init();
+    window.addEventListener('resize', resize);
+    resize();
     animate();
   </script>
 </body>
